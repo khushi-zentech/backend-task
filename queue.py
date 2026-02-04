@@ -16,15 +16,16 @@ def enqueue(queue, item):
 
 # define dequeue operation to remove item from queue
 def dequeue(queue):
-    if len(queue):
-        print(f"\nDequeue item from Queue: {queue.pop(0)}")
+    if queue:
+        item = queue.pop(0)
+        print(f"\nDequeue item from Queue: {item}")
     else:
         print("\nQueue is Empty.\nNo item to dequeue from Queue.")
     return queue
 
 # define peek operation to view item at front of queue
 def peek(queue):
-    if len(queue):
+    if queue:
         print(f"\nItem at Front of Queue: {queue[0]}")
     else:
         print("\nQueue is Empty.\nNo item at Front of Queue.")
