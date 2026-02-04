@@ -8,16 +8,16 @@ Use selection sort to sort this list.
 def selection_sort(static_list):
     length = len(static_list)
 
-    for i in range(length):
-        min_item = i
+    for i in range(length-1):
+        min_index = i
 
         print(f"Step - {i+1} :-\n{static_list}")
         for j in range(i+1, length):
-            if static_list[j] < static_list[min_item]:
-                min_item = j
+            if static_list[j] < static_list[min_index]:
+                min_index = j
 
-        print(f"Minimum Element :- {static_list[min_item]}\n")
-        static_list[i], static_list[min_item] = static_list[min_item], static_list[i]
+        print(f"Minimum Element :- {static_list[min_index]}\n")
+        static_list[i], static_list[min_index] = static_list[min_index], static_list[i]
         
     return static_list
         
