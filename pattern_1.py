@@ -14,7 +14,6 @@ def print_pattern(row):
             print("*", end=" ")
         print()
 
-
 # take input from user
 row = int(input("Enter number of rows: "))
 
