@@ -7,17 +7,14 @@ Use insertion sort to sort this list.
 # define the insertion_sort function
 def insertion_sort(static_list):
     for i in range(1, len(static_list)):
-        temp = static_list[i]
+        swap_element = static_list[i]
         j = i - 1
 
-        while True:
-            if temp < static_list[j] and j >= 0:
-                static_list[j+1] = static_list[j]
-                j = j-1
-            else:
-                break
+        while j >= 0 and swap_element < static_list[j]:
+            static_list[j+1] = static_list[j]
+            j = j-1
             
-        static_list[j+1] = temp
+        static_list[j+1] = swap_element
         print(f"\nStep - {i} :-\n{static_list}")
         
     return static_list
