@@ -7,13 +7,11 @@ Use one of the sorting algorithm that you have developed to sort list here.
 
 # define the bubble_sort function to sort the static list
 def bubble_sort(static_list):
-    length = len(static_list)
-
-    for i in range(length):
-        if i == length - 1:
+    for i in range(len(static_list)):
+        if i == len(static_list) - 1:
             return static_list
         
-        for j in range(0, length - i - 1):
+        for j in range(0, len(static_list) - i - 1):
             if static_list[j] > static_list[j+1]:
                 static_list[j], static_list[j+1] = static_list[j+1], static_list[j]
     
