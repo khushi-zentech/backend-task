@@ -14,16 +14,21 @@ def get_matrix_input():
         row = []
         
         for j in range(3):
-            element = int(input(f"Enter Element at [{i}][{j}]: "))
-            row.append(element)
+            element = input(f"Enter Element at [{i}][{j}]: ")
+
+            if not element.isdigit():
+                print("\nPlease enter valid integer input only.\n")
+                return get_matrix_input()
+
+            row.append(int(element))
         
         matrix.append(row)
-    
+            
     return matrix
 
 # define function to multiply two matrix
 def matrix_multiplication(matrix_1, matrix_2):
-    result_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+    result_matrix = [[0 for i in range(3)] for j in range(3)]
 
     for i in range(3):
         for j in range(3):
