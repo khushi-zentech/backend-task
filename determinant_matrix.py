@@ -10,8 +10,13 @@ def get_matrix_input():
         row = []
         
         for j in range(3):
-            element = int(input(f"Enter element at [{i}][{j}]: "))
-            row.append(element)
+            element = input(f"Enter element at [{i}][{j}]: ")
+
+            if not element.isdigit():
+                print("\nPlease enter valid integer input only.\n")
+                return get_matrix_input()
+
+            row.append(int(element))
         
         matrix.append(row)
     
@@ -19,11 +24,11 @@ def get_matrix_input():
 
 # define function to calculate determinant of 3x3 matrix
 def calculate_determinant(matrix):
-    term_1 = matrix[0][0] * ((matrix[1][1] * matrix[2][2]) - (matrix[1][2] * matrix[2][1]))
-    term_2 = matrix[0][1] * ((matrix[1][0] * matrix[2][2]) - (matrix[1][2] * matrix[2][0]))
-    term_3 = matrix[0][2] * ((matrix[1][0] * matrix[2][1]) - (matrix[1][1] * matrix[2][0]))
+    column_1 = (matrix[1][1] * matrix[2][2]) - (matrix[1][2] * matrix[2][1])
+    column_2 = (matrix[1][0] * matrix[2][2]) - (matrix[1][2] * matrix[2][0])
+    column_3 = (matrix[1][0] * matrix[2][1]) - (matrix[1][1] * matrix[2][0])
     
-    determinant = term_1 - term_2 + term_3
+    determinant = (matrix[0][0] * column_1) - (matrix[0][1] * column_2) + (matrix[0][2] * column_3)
     
     return determinant
 
