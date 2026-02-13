@@ -13,18 +13,34 @@ def find_reverse(number):
 
     return rev_num
 
-# get user input
-number = int(input("\nEnter Number: "))
+# define function to check whether given number is palindrome or not
+def check_palindrome():
+    while True:
+       
+        try:
+            # get user input
+            number = int(input("\nEnter Number: "))
+
+            if number < 0:
+                print("\nPalindrome number of negative integer does not exist.")
+                continue
+
+            # call function to get reverse of given number
+            reverse = find_reverse(number)
+
+            # display output
+            print(f"\nYour given number: {number}")
+            print(f"Reverse of that number: {reverse}")
+
+            # check condition for palindrome number and display the result
+            if reverse == number:
+                print("\nYes, given number is a Palindrome Number.")
+            else:
+                print("\nNo, given number is not a Palindrome Number.")
+
+            break
+        except Exception:
+            print("\nPlease enter valid integer input only.")
 
 # call the function
-reverse = find_reverse(number)
-
-# display output
-print(f"\nYour given number: {number}")
-print(f"Reverse of that number: {reverse}")
-
-# check condition for palindrome number and display the result
-if reverse == number:
-    print("\nYes, given number is a Palindrome Number.")
-else:
-    print("\nNo, given number is not a Palindrome Number.")
+check_palindrome()
