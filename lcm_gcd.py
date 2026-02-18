@@ -33,8 +33,10 @@ while True:
 
         # display results
         print(f"\nGCD of {num1} and {num2}: {gcd_result}")
-        print(f"\nLCM of {num1} and {num2}: {lcm_result}")
+        print(f"LCM of {num1} and {num2}: {lcm_result}")
         
         break
+    except ValueError:
+        print("\nValueError: Enter valid integer input only.")
     except Exception:
         print("\nPlease enter valid integer input only.")
