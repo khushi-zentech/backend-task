@@ -6,7 +6,7 @@ After you complete simple game implement it in a way that computer never loses.
 """
 
 # import random module to generate random moves for computer
-import random
+# from random import choice
 
 # define a tictactoe class to manage game logic
 class TicTacToe:
@@ -40,7 +40,7 @@ class TicTacToe:
             self.display_board()
     
             if vs_computer and isinstance(current_player, Computer):
-                move = current_player.get_move(self.board)
+                move = current_player.get_computer_move(self.board)
                 print(f"\nComputer chooses position {move}")
             else:
                 move = current_player.get_move()
@@ -115,10 +115,40 @@ class Computer:
         self.symbol = symbol
 
     # define function to get computer's move
-    def get_move(self, board):
-        available_moves = [i for i in range(9) if board[i] == " "]
-        return random.choice(available_moves)
+    def get_computer_move(self, board):
+        # simple game logic to make computer's move
+        # available_moves = [i for i in range(9) if board[i] == " "]
+        # return choice(available_moves)
 
+        # logic to make computer's move so that it never loses
+        if self.symbol == 'o':
+            player_symbol = 'x'
+        else:
+            player_symbol = 'o'
+
+        win_positions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+
+        for combo in win_positions:
+            positions = [board[i] for i in combo]
+            if positions.count(self.symbol) == 2 and positions.count(" ") == 1:
+                return combo[positions.index(" ")]
+
+        for combo in win_positions:
+            positions = [board[i] for i in combo]
+            if positions.count(player_symbol) == 2 and positions.count(" ") == 1:
+                return combo[positions.index(" ")]
+            
+        if board[4] == " ":
+            return 4
+
+        for i in [0,2,6,8]:
+            if board[i] == " ":
+                return i
+
+        for i in [1,3,5,7]:
+            if board[i] == " ":
+                return i
+       
 # define menu function to interact with user
 def menu():
     print("\nWelcome to Tic-Tac-Toe Game!")
