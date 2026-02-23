@@ -38,15 +38,22 @@ def cows_bulls_game(random_number):
         # check if user enters correct 4-digit number or not
         if len(user_number) == 4 and user_number.isdigit():
             
+            remaining_user_number = []
+            remaining_random_number = []
+
             # count cows
             for i in range(4):
                 if user_number[i] == random_number[i]:
                     cows += 1
-            
+                else:
+                    remaining_user_number.append(user_number[i])
+                    remaining_random_number.append(random_number[i])
+
             # count bulls
-            for j in range(4):
-                if user_number[j] in random_number and user_number[j] != random_number[j]:
+            for j in remaining_user_number:
+                if j in remaining_random_number:
                     bulls += 1
+                    remaining_random_number.remove(j)
         
             # check if user_number is correctly matched or not
             if cows == 4:
