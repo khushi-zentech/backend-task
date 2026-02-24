@@ -14,7 +14,7 @@ def print_pattern(row):
     for i in range(row): # time complexity: O(row^2)
         for j in range(i+1):
             print(chr(ch), end=" ")
-        ch += 1
+        ch += 1  
         print()
 
 # take input from user and validate it
@@ -25,10 +25,13 @@ while True:
     row = input("\nEnter number of rows: ")
     
     if row.isdigit():
-        # call the function
-        print_pattern(int(row))
-        
-        break
+        if int(row) > 0 and int(row) < 27:
+            # call the function
+            print_pattern(int(row))
+            
+            break
+        else:
+            print("\nPlease Enter number of row in alphabetical range (1-26).")
     else:
         print("\nPlease enter a valid positive integer input only.")
 
