@@ -23,7 +23,6 @@ Hint: You can manage all this with data dictionary data type.
 """
 
 from random import randint # to generate card number and pin number randomly
-
 class Bank:
     '''This model manages bank details'''
     
@@ -34,8 +33,6 @@ class Bank:
         
         self.atms = {}
         self.users = {}
-
-
 class ATM:
     '''This model manages ATM details'''
     
@@ -44,7 +41,6 @@ class ATM:
         self.name = name
         self.bank = bank
         self.balance = balance
-
 class User:
     '''This model manages user details'''
     
@@ -65,8 +61,7 @@ class User:
 
     @staticmethod
     def generate_pin():
-        return randint(1000, 9999)
-    
+        return randint(1000, 9999) 
 class ATMSystemController:
     '''This controller manages ATM System'''
     
@@ -128,7 +123,7 @@ class ATMSystemController:
         return user.card == card and user.pin == pin
     
     def check_conditions(self, user_name, atm_name, amount):
-        if self.TRANSACTION_COUNT >= self.DAY_TRANSACTION_LIMIT:
+        if ATMSystemController.TRANSACTION_COUNT >= ATMSystemController.DAY_TRANSACTION_LIMIT:
             return {"Success": False, "Message": "\nDaily transaction limit reached."}
 
         user = self.users.get(user_name)
@@ -140,13 +135,13 @@ class ATMSystemController:
         if not atm:
             return {"Success": False, "Message": "\nATM not Found!"}
 
-        if user.daily_transaction_count >= self.USER_TRANSACTION_LIMIT:
+        if user.daily_transaction_count >= ATMSystemController.USER_TRANSACTION_LIMIT:
             return {"Success": False, "Message": "\nUser's daily transaction limit reached."}
 
         if amount <= 0:
             return {"Success": False, "Message": "\nInvalid amount!"}
 
-        if amount > self.SINGLE_TRANSACTION_LIMIT:
+        if amount > ATMSystemController.SINGLE_TRANSACTION_LIMIT:
             return {"Success": False, "Message": "\nSingle transaction limit exceeded."}
         
         return {"Success": True, "Message": None}
@@ -264,7 +259,6 @@ def menu():
                         continue
 
                     print(f"\nWelcome {user_name}!")
-
                     while True:
                         print("\n1. Deposit")
                         print("2. Withdraw")
