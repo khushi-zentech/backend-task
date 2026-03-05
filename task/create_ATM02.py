@@ -22,7 +22,8 @@ Nice to have features:
 Hint: You can manage all this with data dictionary data type.
 """
 
-from random import randint # to generate card number and pin number
+from random import randint # Generate card number and PIN
+
 class Bank:
     '''This model manages bank details'''
     
@@ -33,18 +34,20 @@ class Bank:
         
         self.atms = {}
         self.users = {}
+        
 class ATM:
     '''This model manages ATM details'''
     
-    def __init__(self, name, bank, balance):
+    def __init__(self, name, bank: Bank, balance):
         '''constructor to intialize ATM details'''
         self.name = name
         self.bank = bank
         self.balance = balance
+        
 class User:
     '''This model manages user details'''
     
-    def __init__(self, name, bank):
+    def __init__(self, name, bank: Bank):
         '''constructor to intialize user details'''
         self.name = name
         self.bank = bank
@@ -62,6 +65,7 @@ class User:
     @staticmethod
     def generate_pin():
         return randint(1000, 9999) 
+    
 class ATMSystemController:
     '''This controller manages ATM System'''
 
@@ -116,18 +120,22 @@ class ATMSystemController:
     
     def authenticate_user(self, user_name, card, pin):
         user = self.users.get(user_name)
-        
+
         if not user:
             return {"success": False, "message": "\nUser not Found!"}
 
-        return user.card == card and user.pin == pin
+        if user.card == card and user.pin == pin:
+            return {"success": True}
+
+        return {"success": False, "message": "\nInvalid Credentials!"}
+        
     
     def check_conditions(self, user_name, atm_name, amount):
-        if self.transaction_count >= self.day_transaction_limit:
-            return {"success": False, "message": "\nDaily transaction limit reached."}
-
         user = self.users.get(user_name)
         atm = self.atms.get(atm_name)
+
+        if self.transaction_count >= self.day_transaction_limit:
+            return {"success": False, "message": "\nDaily transaction limit reached."}
 
         if not user:
             return {"success": False, "message": "\nUser not Found!"}
@@ -144,73 +152,77 @@ class ATMSystemController:
         if amount > self.single_transaction_limit:
             return {"success": False, "message": "\nSingle transaction limit exceeded."}
         
-        return {"success": True, "message": None}
+        return {"success": True, "user": user, "atm": atm}
     
     def deposit(self, user_name, atm_name, amount):
         result = self.check_conditions(user_name, atm_name, amount)
-        
-        if result.get("success"):
-            user = self.users.get(user_name)
-            atm = self.atms.get(atm_name)
-        
-            if user.bank != atm.bank:
-                return {"success": False, "message": "\nDeposit allowed only in Your Bank's ATM."}
-            
-            user.balance += amount
-            atm.balance += amount
-            user.bank.balance += amount
 
-            user.daily_transaction_count += 1
-            self.transaction_count += 1
+        if not result.get("success"):
+            return result
+
+        user = result.get("user")
+        atm = result.get("atm")
+        
+        if user.bank != atm.bank:
+            return {"success": False, "message": "\nDeposit allowed only in Your Bank's ATM."}
             
-            return {"success": True, "message": f"\n{amount} Rs. deposited Successfully.\nCurrent Balance: {user.balance}"}
-        else:
-            return {"success": False, "message": result.get("message")}
+        user.balance += amount
+        atm.balance += amount
+        user.bank.balance += amount
+
+        user.daily_transaction_count += 1
+        self.transaction_count += 1
+            
+        return {"success": True, "message": f"\n{amount} Rs. deposited Successfully.\nCurrent Balance: {user.balance}"}
         
     def withdraw(self, user_name, atm_name, amount):
         result = self.check_conditions(user_name, atm_name, amount)
+
+        if not result.get("success"):
+            return result
+
+        user = result.get("user")
+        atm = result.get("atm")
+    
+        extra_charge = 0
+        if user.bank != atm.bank:
+            extra_charge = amount * 0.05
+
+        total_amount = amount + extra_charge
+
+        if user.balance < total_amount:
+            return {"success": False, "message": "\nInsufficient Balance!"}
+
+        if atm.balance < amount:
+            return {"success": False, "message": "\nATM has Insufficient Cash!"}
+
+        user.balance -= total_amount
+        user.bank.balance -= amount
+        atm.balance -= amount
+        atm.bank.balance += extra_charge
+
+        user.daily_transaction_count += 1
+        self.transaction_count += 1
         
-        if result.get("success"):
-            user = self.users.get(user_name)
-            atm = self.atms.get(atm_name)
-            
-            extra_charge = 0
-            if user.bank != atm.bank:
-                extra_charge = amount * 0.05
-
-            total_amount = amount + extra_charge
-
-            if user.balance < total_amount:
-                return {"success": False, "message": "\nInsufficient Balance!"}
-
-            if atm.balance < amount:
-                return {"success": False, "message": "\nATM has Insufficient Cash!"}
-
-            user.balance -= total_amount
-            atm.balance -= amount
-            user.bank.balance -= amount
-
-            user.daily_transaction_count += 1
-            self.transaction_count += 1
-
-            return {"success": True, "message": f"\n{amount} Rs. withdrawn Successfully.\nCurrent Balance: {user.balance}"}
+        if extra_charge > 0:
+            return {"success": True, "message": f"\n{amount} Rs. withdrawn Successfully with 5% extra charge (Using another Bank's ATM).\nExtra Charge: {extra_charge}\nCurrent Balance: {user.balance}"}
         else:
-            return {"success": False, "message": result.get("message")}
+            return {"success": True, "message": f"\n{amount} Rs. withdrawn Successfully.\nCurrent Balance: {user.balance}"}
         
     def get_user_details(self, user_name):
         user = self.users.get(user_name)
-        
+
         if not user:
             return {"success": False, "message": "\nUser not Found!"}
 
-        return {"name": user.name, "bank": user.bank.name, "card": user.card, "balance": user.balance,}
-    
+        return {"success": True, "data": {"name": user.name, "bank": user.bank.name, "card": user.card, "balance": user.balance}}
+
 def menu():
     '''This view interact with user'''
     
     atm_system = ATMSystemController()
 
-    # create Bank and ATM with object
+    # create Bank and ATM 
     atm_system.create_bank("SBI", 500000)
     atm_system.create_bank("HDFC", 300000)
     atm_system.create_bank("BOI", 400000)
@@ -233,7 +245,7 @@ def menu():
                     user_name = input("\nEnter User Name: ")
 
                     if user_name not in atm_system.users:
-                        bank_name = input("\nEnter Bank Name: ")
+                        bank_name = input("\nEnter Bank Name: ").upper()
                         
                         result = atm_system.create_user(user_name, bank_name)
 
@@ -254,8 +266,10 @@ def menu():
                         print("\nValueError: Please Enter valid value of input.")
                         continue
 
-                    if not atm_system.authenticate_user(user_name, card, pin):
-                        print("Invalid Credentials!")
+                    authenticate_result = atm_system.authenticate_user(user_name, card, pin)
+
+                    if not authenticate_result.get("success"):
+                        print(authenticate_result.get("message"))
                         continue
 
                     print(f"\nWelcome {user_name}!")
@@ -270,19 +284,25 @@ def menu():
 
                             if user_choice == 1:
                                 try:
-                                    atm_name = input("\nEnter ATM name (Bank-ATM) or Quit to this operation: ")
+                                    atm_name = input("\nEnter ATM name (Bank-ATM) or Quit to this operation: ").upper()
                                     
-                                    if atm_name.lower() == "quit":
+                                    if atm_name == "QUIT":
                                         continue
 
                                     amount = input("\nEnter amount or Quit to this operation: ")
-                                    
+
                                     if amount.lower() == "quit":
+                                        continue
+
+                                    try:
+                                        amount = float(amount)
+                                    except ValueError:
+                                        print("\nInvalid amount!")
                                         continue
                                 except ValueError:
                                     print("\nValueError: Please Enter valid value of input.")
                             
-                                result = atm_system.deposit(user_name, atm_name, float(amount))
+                                result = atm_system.deposit(user_name, atm_name, amount)
                                 
                                 if result.get("success"):
                                     print(result.get('message'))
@@ -290,19 +310,25 @@ def menu():
                                     print(result.get("message"))
                             elif user_choice == 2:
                                 try:
-                                    atm_name = input("\nEnter ATM name (Bank-ATM) or Quit to this operation: ")
+                                    atm_name = input("\nEnter ATM name (Bank-ATM) or Quit to this operation: ").upper()
 
-                                    if atm_name.lower() == "quit":
+                                    if atm_name == "QUIT":
                                         continue
 
                                     amount = input("\nEnter amount or Quit to this operation: ")
-                                        
+
                                     if amount.lower() == "quit":
+                                        continue
+
+                                    try:
+                                        amount = float(amount)
+                                    except ValueError:
+                                        print("\nInvalid amount!")
                                         continue
                                 except ValueError:
                                     print("\nValueError: Please Enter valid value of input.")
                                 
-                                result = atm_system.withdraw(user_name, atm_name, float(amount))
+                                result = atm_system.withdraw(user_name, atm_name, amount)
                                 
                                 if result.get("success"):
                                     print(result.get("message"))
@@ -310,10 +336,14 @@ def menu():
                                     print(result.get("message"))
                             elif user_choice == 3:
                                 details = atm_system.get_user_details(user_name)
-                                
-                                print("\nHere is your details:")
-                                for key, value in details.items():
-                                    print(f"{key.capitalize()}: {value}")
+
+                                if not details.get("success"):
+                                    print(details.get("message"))
+                                else:
+                                    print("\nHere is your details:")
+                                    
+                                    for key, value in details.get("data").items():
+                                        print(f"{key.capitalize()}: {value}")
                             elif user_choice == 4:
                                 print("\nLogged out Successfully!")   
                                 break
