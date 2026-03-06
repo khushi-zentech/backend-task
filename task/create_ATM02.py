@@ -27,18 +27,15 @@ from random import randint # Generate card number and PIN
 class Bank:
     '''This model manages bank details'''
     
-    def __init__(self, name, balance):
+    def __init__(self, name: str, balance: float):
         '''constructor to intialize bank details'''
         self.name = name
         self.balance = balance
-        
-        self.atms = {}
-        self.users = {}
-        
+
 class ATM:
     '''This model manages ATM details'''
     
-    def __init__(self, name, bank: Bank, balance):
+    def __init__(self, name: str, bank: Bank, balance: float):
         '''constructor to intialize ATM details'''
         self.name = name
         self.bank = bank
@@ -47,7 +44,7 @@ class ATM:
 class User:
     '''This model manages user details'''
     
-    def __init__(self, name, bank: Bank):
+    def __init__(self, name: str, bank: Bank):
         '''constructor to intialize user details'''
         self.name = name
         self.bank = bank
@@ -80,16 +77,16 @@ class ATMSystemController:
         self.single_transaction_limit = 10000
         self.transaction_count = 0
         
-    def create_bank(self, name, balance):
+    def create_bank(self, name: str, balance: float):
         if name in self.banks:
             return {"success": False, "message": "\nBank already exists!"}
 
-        bank = Bank(name, balance)
+        bank: Bank = Bank(name, balance)
         self.banks[name] = bank
         return {"success": True, "message": "\nBank created Successfully."}
     
-    def create_atm(self, bank_name, atm_name, balance):
-        bank = self.banks.get(bank_name)
+    def create_atm(self, bank_name: str, atm_name: str, balance: float):
+        bank: Bank = self.banks.get(bank_name)
         
         if not bank:
             return {"success": False, "message": "\nBank not Found!"}
@@ -97,14 +94,13 @@ class ATMSystemController:
         if atm_name in self.atms:
             return {"success": False, "message": "\nATM already exists!"}
 
-        atm = ATM(atm_name, bank, balance)
+        atm: ATM = ATM(atm_name, bank, balance)
         self.atms[atm_name] = atm
-        bank.atms[atm_name] = atm
 
         return {"success": True, "message": "\nATM created Successfully."}
     
-    def create_user(self, user_name, bank_name):
-        bank = self.banks.get(bank_name)
+    def create_user(self, user_name: str, bank_name: str):
+        bank: Bank = self.banks.get(bank_name)
         
         if not bank:
             return {"success": False, "message": "\nBank not Found!"}
@@ -112,14 +108,13 @@ class ATMSystemController:
         if user_name in self.users:
             return {"success": False, "message": "\nUser already exists!"}
 
-        user = User(user_name, bank)
+        user: User = User(user_name, bank)
         self.users[user_name] = user
-        bank.users[user_name] = user
 
         return {"success": True, "card": user.card, "pin": user.pin}
     
-    def authenticate_user(self, user_name, card, pin):
-        user = self.users.get(user_name)
+    def authenticate_user(self, user_name: str, card: int, pin: int):
+        user: User = self.users.get(user_name)
 
         if not user:
             return {"success": False, "message": "\nUser not Found!"}
@@ -130,9 +125,9 @@ class ATMSystemController:
         return {"success": False, "message": "\nInvalid Credentials!"}
         
     
-    def check_conditions(self, user_name, atm_name, amount):
-        user = self.users.get(user_name)
-        atm = self.atms.get(atm_name)
+    def authenticate_transaction(self, user_name: str, atm_name: str, amount: float):
+        user: User = self.users.get(user_name)
+        atm: ATM = self.atms.get(atm_name)
 
         if self.transaction_count >= self.day_transaction_limit:
             return {"success": False, "message": "\nDaily transaction limit reached."}
@@ -154,42 +149,43 @@ class ATMSystemController:
         
         return {"success": True, "user": user, "atm": atm}
     
-    def deposit(self, user_name, atm_name, amount):
-        result = self.check_conditions(user_name, atm_name, amount)
+    def deposit(self, user_name: str, atm_name: str, amount: float):
+        result = self.authenticate_transaction(user_name, atm_name, amount)
 
         if not result.get("success"):
             return result
 
-        user = result.get("user")
-        atm = result.get("atm")
+        user: User = result.get("user")
+        atm: ATM = result.get("atm")
         
         if user.bank != atm.bank:
             return {"success": False, "message": "\nDeposit allowed only in Your Bank's ATM."}
             
         user.balance += amount
-        atm.balance += amount
         user.bank.balance += amount
 
         user.daily_transaction_count += 1
         self.transaction_count += 1
             
-        return {"success": True, "message": f"\n{amount} Rs. deposited Successfully.\nCurrent Balance: {user.balance}"}
+        return {
+            "success": True, 
+            "message": f"\n{amount} Rs. deposited Successfully.\nCurrent Balance: {user.balance}"
+        }
         
-    def withdraw(self, user_name, atm_name, amount):
-        result = self.check_conditions(user_name, atm_name, amount)
+    def withdraw(self, user_name: str, atm_name: str, amount: float):
+        result = self.authenticate_transaction(user_name, atm_name, amount)
 
         if not result.get("success"):
             return result
 
-        user = result.get("user")
-        atm = result.get("atm")
+        user: User = result.get("user")
+        atm: ATM = result.get("atm")
     
         extra_charge = 0
         if user.bank != atm.bank:
             extra_charge = amount * 0.05
 
         total_amount = amount + extra_charge
-
         if user.balance < total_amount:
             return {"success": False, "message": "\nInsufficient Balance!"}
 
@@ -197,25 +193,41 @@ class ATMSystemController:
             return {"success": False, "message": "\nATM has Insufficient Cash!"}
 
         user.balance -= total_amount
-        user.bank.balance -= amount
-        atm.balance -= amount
+        user.bank.balance -= total_amount
+        atm.balance -= total_amount
         atm.bank.balance += extra_charge
 
         user.daily_transaction_count += 1
         self.transaction_count += 1
         
         if extra_charge > 0:
-            return {"success": True, "message": f"\n{amount} Rs. withdrawn Successfully with 5% extra charge (Using another Bank's ATM).\nExtra Charge: {extra_charge}\nCurrent Balance: {user.balance}"}
+            return {
+                "success": True, 
+                "message": f"\n{amount} Rs. withdrawn Successfully.(5% extra charge using another Bank's ATM)",
+                "balance": f"\nExtra Charge: {extra_charge}\nCurrent Balance: {user.balance}"
+            }
         else:
-            return {"success": True, "message": f"\n{amount} Rs. withdrawn Successfully.\nCurrent Balance: {user.balance}"}
+            return {
+                "success": True, 
+                "message": f"\n{amount} Rs. withdrawn Successfully.",
+                "balance": f"\nCurrent Balance: {user.balance}"
+            }
         
     def get_user_details(self, user_name):
-        user = self.users.get(user_name)
+        user: User = self.users.get(user_name)
 
         if not user:
             return {"success": False, "message": "\nUser not Found!"}
 
-        return {"success": True, "data": {"name": user.name, "bank": user.bank.name, "card": user.card, "balance": user.balance}}
+        return {
+            "success": True, 
+            "data": {
+                "name": user.name, 
+                "bank": user.bank.name, 
+                "card": user.card, 
+                "balance": user.balance
+            }
+        }
 
 def menu():
     '''This view interact with user'''
@@ -331,7 +343,7 @@ def menu():
                                 result = atm_system.withdraw(user_name, atm_name, amount)
                                 
                                 if result.get("success"):
-                                    print(result.get("message"))
+                                    print(result.get("message"), result.get("balance"))
                                 else:
                                     print(result.get("message"))
                             elif user_choice == 3:
